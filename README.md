@@ -1,6 +1,8 @@
 # M.GHAZI — Daily Expenses
 
-A lightweight, single-file expense tracker that runs entirely in your browser. No build step, no server, no account — open `expenses.html` and start logging where your money goes. All data is stored locally in your browser via `localStorage`.
+A lightweight, single-file expense tracker that runs entirely in your browser. No build step, no server, no account — open the app and start logging where your money goes. All data is stored locally in your browser via `localStorage`.
+
+**Live app:** https://hamashlo12359-tech.github.io/expenses-tracker/
 
 ## Features
 
@@ -12,13 +14,15 @@ A lightweight, single-file expense tracker that runs entirely in your browser. N
 - **Filter & edit** — filter the list by category, edit or delete any entry.
 - **Multi-currency** — USD, EUR, GBP, JPY, INR, SAR, AED.
 - **CSV import / export** — back up your data or move it between devices.
-- **Mobile friendly** — responsive layout with iOS "add to home screen" support.
+- **Mobile friendly** — responsive layout, installable to your iPhone/iPad home screen.
 
 ## Usage
 
-Open `expenses.html` in any modern browser — that's it.
+Open the [live app](https://hamashlo12359-tech.github.io/expenses-tracker/) in any browser — or open `index.html` locally — and start logging.
 
-Because everything is stored in `localStorage`, your data stays on the device/browser you use. Use **Export** to download a CSV backup and **Import** to restore it elsewhere.
+**On iPhone/iPad:** open the live link in **Safari**, tap the **Share** button, then **Add to Home Screen**. It installs with its own icon and launches fullscreen like a native app.
+
+Because everything is stored in `localStorage`, your data stays on the device/browser you use. Use **Export** to download a CSV backup and **Import** to restore it on another device.
 
 ## Tech
 
