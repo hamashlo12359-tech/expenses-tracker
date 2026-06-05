@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>M.GHAZI Expenses</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="M.GHAZI">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230f172a'/><text x='90' y='112' font-family='-apple-system,Helvetica,Arial' font-size='58' font-weight='700' text-anchor='middle' fill='%2338bdf8'>MG</text></svg>">
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #0ea5e9;
+    --danger: #f43f5e;
+    --good: #22c55e;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+    -webkit-tap-highlight-color: transparent;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  h1 { margin: 0; font-size: 24px; font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .controls-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .controls-bar select,
+  .controls-bar button {
+    flex: 1;
+    padding: 14px 16px;
+    font-size: 16px;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 24px; font-weight: 600; margin-top: 6px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { margin: 0 0 14px 0; font-size: 16px; font-weight: 600; }
+
+  form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  input, select, button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  button {
+    background: var(--accent);
+    color: #0f172a;
+    font-weight: 600;
+    cursor: pointer;
+    border-color: var(--accent);
+  }
+  button:hover { background: var(--accent-2); }
+  button.secondary {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  button.danger {
+    background: transparent;
+    color: var(--danger);
+    border-color: transparent;
+    padding: 4px 8px;
+  }
+  button.danger:hover { background: rgba(244, 63, 94, 0.1); }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .chip {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .chip.active { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
+
+  .expense-list { list-style: none; padding: 0; margin: 0; }
+  .expense {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  button.edit {
+    background: transparent;
+    color: var(--accent);
+    border-color: transparent;
+    padding: 4px 8px;
+  }
+  button.edit:hover { background: rgba(56, 189, 248, 0.1); }
+  .editing-banner {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--accent);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .expense:last-child { border-bottom: none; }
+  .expense-main { min-width: 0; }
+  .expense-desc { font-weight: 500; }
+  .expense-meta { color: var(--muted); font-size: 13px; margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+  }
+  .amount { font-weight: 600; font-size: 16px; }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 20px;
+  }
+
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .breakdown-item {
+    background: var(--panel-2);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .breakdown-cat { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .breakdown-amt { font-weight: 600; margin-top: 2px; }
+  .breakdown-pct { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .budget-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .progress {
+    height: 10px;
+    background: var(--panel-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--good), var(--accent));
+    transition: width 0.3s ease;
+  }
+  .progress-bar.warn { background: linear-gradient(90deg, #f59e0b, #f97316); }
+  .progress-bar.over { background: linear-gradient(90deg, var(--danger), #be123c); }
+  .budget-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .alert {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .alert.warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .alert.over { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+  .charts {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  @media (max-width: 600px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+  .donut-wrap { display: flex; justify-content: center; }
+  .donut { width: 100%; max-width: 240px; height: auto; }
+  .donut-center {
+    fill: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .donut-center-label {
+    fill: var(--muted);
+    font-size: 10px;
+    text-anchor: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .daily-chart { width: 100%; height: 160px; }
+  .daily-bar { fill: var(--accent); }
+  .daily-bar:hover { fill: var(--accent-2); }
+  .axis-text { fill: var(--muted); font-size: 10px; }
+  .chart-empty { text-align: center; color: var(--muted); padding: 20px; }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent);
+    color: #0f172a;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 9998;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.error { background: var(--danger); color: white; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .currency-input { display: flex; align-items: center; }
+  .currency-symbol {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-right: none;
+    padding: 10px 12px;
+    border-radius: 8px 0 0 8px;
+    color: var(--muted);
+  }
+  .currency-input input { border-radius: 0 8px 8px 0; flex: 1; min-width: 0; }
+
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="container">
+  <header>
+    <div>
+      <h1>M.GHAZI — Daily Expenses</h1>
+      <div class="subtitle">Track where your money goes</div>
+    </div>
+  </header>
+
+  <div class="controls-bar">
+    <select id="currency" title="Currency">
+      <option value="$">USD $</option>
+      <option value="€">EUR €</option>
+      <option value="£">GBP £</option>
+      <option value="¥">JPY ¥</option>
+      <option value="₹">INR ₹</option>
+      <option value="﷼">SAR ﷼</option>
+      <option value="د.إ">AED د.إ</option>
+    </select>
+    <button type="button" class="secondary" id="export-btn" title="Download CSV">Export</button>
+    <button type="button" class="secondary" id="import-btn" title="Import CSV">Import</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Today</div>
+      <div class="stat-value" id="stat-today">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">This week</div>
+      <div class="stat-value" id="stat-week">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">This month</div>
+      <div class="stat-value" id="stat-month">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">All time</div>
+      <div class="stat-value" id="stat-all">—</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Monthly budget</h2>
+    <div class="budget-row">
+      <div class="currency-input">
+        <span class="currency-symbol" id="budget-symbol">$</span>
+        <input type="number" id="budget-input" placeholder="Set a monthly cap" step="0.01" min="0">
+      </div>
+      <button type="button" id="budget-save">Save</button>
+      <button type="button" class="secondary" id="budget-clear">Clear</button>
+    </div>
+    <div id="budget-display" style="display:none">
+      <div class="progress"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+      <div class="budget-info">
+        <span id="budget-spent">—</span>
+        <span id="budget-remaining">—</span>
+      </div>
+      <div id="budget-alert"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 id="form-title">Add expense</h2>
+    <div id="editing-banner" class="editing-banner" style="display:none">
+      <span>Editing existing entry</span>
+      <button type="button" class="secondary" id="cancel-edit">Cancel</button>
+    </div>
+    <form id="add-form">
+      <div class="currency-input">
+        <span class="currency-symbol" id="currency-symbol">$</span>
+        <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
+      </div>
+      <select id="category" required>
+        <option value="Food">Food</option>
+        <option value="Transport">Transport</option>
+        <option value="Groceries">Groceries</option>
+        <option value="Bills">Bills</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Health">Health</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="date" id="date" required>
+      <button type="submit" id="submit-btn">Add</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Expenses</h2>
+    <div class="filters" id="filters"></div>
+    <ul class="expense-list" id="expense-list"></ul>
+  </div>
+
+  <div class="panel">
+    <h2>Breakdown by category (this month)</h2>
+    <div class="charts">
+      <div class="donut-wrap" id="donut-wrap"></div>
+      <div id="breakdown" class="breakdown"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Daily spending (this month)</h2>
+    <div id="daily-chart-wrap"></div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'daily-expenses-v1';
+  const CURRENCY_KEY = 'daily-expenses-currency';
+  const BUDGET_KEY = 'daily-expenses-budget';
+
+  const PALETTE = ['#38bdf8', '#a78bfa', '#f472b6', '#fb923c', '#facc15', '#4ade80', '#22d3ee', '#f87171', '#c084fc', '#fbbf24'];
+
+  const safeStore = {
+    get(k, fallback) {
+      try { const v = localStorage.getItem(k); return v == null ? fallback : v; }
+      catch (e) { return fallback; }
+    },
+    set(k, v) {
+      try { localStorage.setItem(k, v); } catch (e) { /* private mode / sandbox */ }
+    },
+  };
+
+  let parsedExpenses = [];
+  try { parsedExpenses = JSON.parse(safeStore.get(STORAGE_KEY, '[]')) || []; }
+  catch (e) { parsedExpenses = []; }
+
+  const state = {
+    expenses: parsedExpenses,
+    filter: 'All',
+    currency: safeStore.get(CURRENCY_KEY, '$') || '$',
+    budget: parseFloat(safeStore.get(BUDGET_KEY, '0')) || 0,
+    editingId: null,
+  };
+
+  const catColor = (() => {
+    const map = {};
+    let i = 0;
+    return (cat) => {
+      if (!(cat in map)) { map[cat] = PALETTE[i % PALETTE.length]; i++; }
+      return map[cat];
+    };
+  })();
+
+  const $ = (id) => document.getElementById(id);
+
+  let toastTimer;
+  function showToast(msg, isError) {
+    const t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.toggle('error', !!isError);
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function save() {
+    safeStore.set(STORAGE_KEY, JSON.stringify(state.expenses));
+    safeStore.set(CURRENCY_KEY, state.currency);
+    safeStore.set(BUDGET_KEY, String(state.budget));
+  }
+
+  function fmt(n) {
+    return state.currency + n.toFixed(2);
+  }
+
+  function startOfDay(d) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  function startOfWeek(d) {
+    const x = startOfDay(d);
+    const day = x.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    x.setDate(x.getDate() + diff);
+    return x;
+  }
+
+  function startOfMonth(d) {
+    const x = startOfDay(d);
+    x.setDate(1);
+    return x;
+  }
+
+  function totalSince(date) {
+    const cutoff = date.getTime();
+    return state.expenses
+      .filter(e => new Date(e.date).getTime() >= cutoff)
+      .reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  function render() {
+    const now = new Date();
+    $('stat-today').textContent = fmt(totalSince(startOfDay(now)));
+    $('stat-week').textContent = fmt(totalSince(startOfWeek(now)));
+    $('stat-month').textContent = fmt(totalSince(startOfMonth(now)));
+    $('stat-all').textContent = fmt(state.expenses.reduce((s, e) => s + e.amount, 0));
+
+    renderBudget();
+    renderBreakdown();
+    renderDonut();
+    renderDailyChart();
+    renderFilters();
+    renderList();
+  }
+
+  function renderBudget() {
+    const display = $('budget-display');
+    if (!state.budget || state.budget <= 0) {
+      display.style.display = 'none';
+      $('budget-input').value = '';
+      return;
+    }
+    display.style.display = 'block';
+    $('budget-input').value = state.budget;
+    const spent = totalSince(startOfMonth(new Date()));
+    const pct = Math.min((spent / state.budget) * 100, 100);
+    const bar = $('progress-bar');
+    bar.style.width = pct + '%';
+    bar.classList.remove('warn', 'over');
+    let alertClass = '', alertText = '';
+    if (spent > state.budget) {
+      bar.classList.add('over');
+      alertClass = 'over';
+      alertText = `Over budget by ${fmt(spent - state.budget)}`;
+    } else if (pct >= 80) {
+      bar.classList.add('warn');
+      alertClass = 'warn';
+      alertText = `Heads up — ${pct.toFixed(0)}% of budget used`;
+    }
+    $('budget-spent').textContent = `${fmt(spent)} spent`;
+    $('budget-remaining').textContent = `${fmt(Math.max(0, state.budget - spent))} left`;
+    const alertEl = $('budget-alert');
+    alertEl.innerHTML = alertText ? `<div class="alert ${alertClass}">${alertText}</div>` : '';
+  }
+
+  function monthEntries() {
+    const monthStart = startOfMonth(new Date()).getTime();
+    const byCat = {};
+    let total = 0;
+    for (const e of state.expenses) {
+      if (new Date(e.date).getTime() < monthStart) continue;
+      byCat[e.category] = (byCat[e.category] || 0) + e.amount;
+      total += e.amount;
+    }
+    return { entries: Object.entries(byCat).sort((a, b) => b[1] - a[1]), total };
+  }
+
+  function renderBreakdown() {
+    const { entries, total } = monthEntries();
+    const box = $('breakdown');
+    if (!entries.length) {
+      box.innerHTML = '<div class="empty" style="grid-column: 1/-1; padding: 16px;">No expenses this month yet.</div>';
+      return;
+    }
+    box.innerHTML = entries.map(([cat, amt]) => {
+      const color = catColor(cat);
+      const pct = total ? (amt / total * 100).toFixed(1) : '0';
+      return `
+        <div class="breakdown-item" style="border-left-color:${color}">
+          <div class="breakdown-cat"><span class="swatch" style="background:${color}"></span>${escapeHtml(cat)}</div>
+          <div class="breakdown-amt">${fmt(amt)}</div>
+          <div class="breakdown-pct">${pct}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderDonut() {
+    const { entries, total } = monthEntries();
+    const wrap = $('donut-wrap');
+    if (!entries.length || !total) {
+      wrap.innerHTML = '<div class="chart-empty">No data yet</div>';
+      return;
+    }
+    const size = 200, cx = size / 2, cy = size / 2, r = 80, innerR = 50;
+    let angle = -Math.PI / 2;
+    const slices = entries.map(([cat, amt]) => {
+      const slice = (amt / total) * Math.PI * 2;
+      const a0 = angle, a1 = angle + slice;
+      angle = a1;
+      const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      const xi1 = cx + innerR * Math.cos(a1), yi1 = cy + innerR * Math.sin(a1);
+      const xi0 = cx + innerR * Math.cos(a0), yi0 = cy + innerR * Math.sin(a0);
+      const large = slice > Math.PI ? 1 : 0;
+      const d = `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} L ${xi1} ${yi1} A ${innerR} ${innerR} 0 ${large} 0 ${xi0} ${yi0} Z`;
+      return `<path d="${d}" fill="${catColor(cat)}"><title>${escapeHtml(cat)}: ${fmt(amt)}</title></path>`;
+    }).join('');
+    wrap.innerHTML = `
+      <svg class="donut" viewBox="0 0 ${size} ${size}" role="img" aria-label="Category breakdown">
+        ${slices}
+        <text class="donut-center-label" x="${cx}" y="${cy - 6}">Month total</text>
+        <text class="donut-center" x="${cx}" y="${cy + 14}">${fmt(total)}</text>
+      </svg>
+    `;
+  }
+
+  function renderDailyChart() {
+    const wrap = $('daily-chart-wrap');
+    const now = new Date();
+    const year = now.getFullYear(), month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const totals = new Array(daysInMonth).fill(0);
+    for (const e of state.expenses) {
+      const d = new Date(e.date);
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        totals[d.getDate() - 1] += e.amount;
+      }
+    }
+    const max = Math.max(...totals, 0);
+    if (max === 0) {
+      wrap.innerHTML = '<div class="chart-empty">No spending logged this month</div>';
+      return;
+    }
+    const width = 600, height = 160, pad = 24;
+    const bw = (width - pad * 2) / daysInMonth;
+    const bars = totals.map((v, i) => {
+      const h = v === 0 ? 0 : ((v / max) * (height - pad * 2));
+      const x = pad + i * bw;
+      const y = height - pad - h;
+      return `<rect class="daily-bar" x="${x + 1}" y="${y}" width="${bw - 2}" height="${h}" rx="2"><title>Day ${i + 1}: ${fmt(v)}</title></rect>`;
+    }).join('');
+    const ticks = [1, Math.ceil(daysInMonth / 2), daysInMonth];
+    const tickLabels = ticks.map(d => {
+      const x = pad + (d - 0.5) * bw;
+      return `<text class="axis-text" x="${x}" y="${height - 6}" text-anchor="middle">${d}</text>`;
+    }).join('');
+    const yMaxLabel = `<text class="axis-text" x="${pad - 4}" y="${pad + 4}" text-anchor="end">${fmt(max)}</text>`;
+    wrap.innerHTML = `
+      <svg class="daily-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Daily spending">
+        ${bars}${tickLabels}${yMaxLabel}
+      </svg>
+    `;
+  }
+
+  function renderFilters() {
+    const cats = ['All', ...new Set(state.expenses.map(e => e.category))];
+    $('filters').innerHTML = cats.map(c => `
+      <span class="chip ${state.filter === c ? 'active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</span>
+    `).join('');
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        state.filter = chip.dataset.cat;
+        render();
+      });
+    });
+  }
+
+  function renderList() {
+    const list = state.expenses
+      .filter(e => state.filter === 'All' || e.category === state.filter)
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+
+    const ul = $('expense-list');
+    if (!list.length) {
+      ul.innerHTML = '<li class="empty">No expenses yet. Add your first one above.</li>';
+      return;
+    }
+    ul.innerHTML = list.map(e => `
+      <li class="expense">
+        <div class="expense-main">
+          <div class="expense-desc">${escapeHtml(e.category)}</div>
+          <div class="expense-meta">
+            <span>${formatDate(e.date)}</span>
+          </div>
+        </div>
+        <div class="amount">${fmt(e.amount)}</div>
+        <button class="edit" data-edit="${e.id}" title="Edit">✎</button>
+        <button class="danger" data-id="${e.id}" title="Delete">✕</button>
+      </li>
+    `).join('');
+    document.querySelectorAll('.danger[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        state.expenses = state.expenses.filter(e => e.id !== id);
+        if (state.editingId === id) exitEditMode();
+        save();
+        render();
+      });
+    });
+    document.querySelectorAll('.edit[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.edit);
+        const e = state.expenses.find(x => x.id === id);
+        if (!e) return;
+        state.editingId = id;
+        $('amount').value = e.amount;
+        $('category').value = e.category;
+        $('date').value = e.date;
+        $('form-title').textContent = 'Edit expense';
+        $('submit-btn').textContent = 'Update';
+        $('editing-banner').style.display = 'flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('amount').focus();
+      });
+    });
+  }
+
+  function exitEditMode() {
+    state.editingId = null;
+    $('form-title').textContent = 'Add expense';
+    $('submit-btn').textContent = 'Add';
+    $('editing-banner').style.display = 'none';
+    $('amount').value = '';
+    setDateToToday();
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function setDateToToday() {
+    $('date').value = todayStr();
+  }
+
+  $('add-form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    try {
+      const amount = parseFloat($('amount').value);
+      if (!(amount > 0)) { alert('Enter an amount greater than 0'); return; }
+      let dateVal = $('date').value;
+      if (!dateVal) { dateVal = todayStr(); $('date').value = dateVal; }
+      const category = $('category').value;
+      if (state.editingId != null) {
+        const e = state.expenses.find(x => x.id === state.editingId);
+        if (e) { e.amount = amount; e.category = category; e.date = dateVal; }
+        exitEditMode();
+        save();
+        render();
+        showToast('Updated');
+      } else {
+        state.expenses.push({
+          id: Date.now(),
+          amount,
+          category,
+          date: dateVal,
+        });
+        $('amount').value = '';
+        setDateToToday();
+        save();
+        render();
+        showToast(`Added ${fmt(amount)} · ${category}`);
+      }
+    } catch (err) {
+      showToast('Error: ' + (err && err.message ? err.message : err), true);
+    }
+  });
+
+  $('cancel-edit').addEventListener('click', () => {
+    exitEditMode();
+    render();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      setDateToToday();
+      render();
+    }
+  });
+  setInterval(setDateToToday, 60 * 1000);
+
+  $('currency').addEventListener('change', (ev) => {
+    state.currency = ev.target.value;
+    $('currency-symbol').textContent = state.currency;
+    $('budget-symbol').textContent = state.currency;
+    save();
+    render();
+  });
+
+  $('budget-save').addEventListener('click', () => {
+    const v = parseFloat($('budget-input').value);
+    state.budget = v > 0 ? v : 0;
+    save();
+    render();
+  });
+
+  $('budget-clear').addEventListener('click', () => {
+    state.budget = 0;
+    $('budget-input').value = '';
+    save();
+    render();
+  });
+
+  function buildCsv() {
+    const headers = ['Date', 'Category', 'Amount', 'Currency'];
+    const escape = (v) => {
+      const s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const rows = state.expenses
+      .slice()
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(e => [
+        e.date,
+        e.category,
+        e.amount.toFixed(2),
+        state.currency,
+      ].map(escape).join(','));
+    return [headers.join(','), ...rows].join('\n');
+  }
+
+  function showCsvFallback(csv) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Your CSV data</strong>
+          <button id="csv-close" style="background:#334155;color:#f1f5f9;border:1px solid #334155;padding:6px 12px;border-radius:8px;cursor:pointer">Close</button>
+        </div>
+        <p style="color:#94a3b8;font-size:13px;margin:0">Download was blocked. Tap inside the box → Select All → Copy, then paste into a file named <code>expenses.csv</code>.</p>
+        <textarea readonly style="flex:1;min-height:240px;background:#0f172a;color:#f1f5f9;border:1px solid #334155;border-radius:8px;padding:10px;font-family:monospace;font-size:12px">${csv.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>
+        <button id="csv-copy" style="background:#38bdf8;color:#0f172a;border:1px solid #38bdf8;padding:10px;border-radius:8px;font-weight:600;cursor:pointer">Copy to clipboard</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#csv-close').onclick = () => overlay.remove();
+    overlay.querySelector('#csv-copy').onclick = async () => {
+      const ta = overlay.querySelector('textarea');
+      try {
+        await navigator.clipboard.writeText(csv);
+        overlay.querySelector('#csv-copy').textContent = 'Copied ✓';
+      } catch (e) {
+        ta.select();
+        document.execCommand('copy');
+        overlay.querySelector('#csv-copy').textContent = 'Copied ✓';
+      }
+    };
+  }
+
+  function parseCsv(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return [];
+    const out = [];
+    const start = /date/i.test(lines[0]) && /category/i.test(lines[0]) ? 1 : 0;
+    for (let i = start; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+      if (cols.length < 3) continue;
+      const date = cols[0];
+      const category = cols[1] || 'Other';
+      const amount = parseFloat(cols[2]);
+      if (!date || !(amount > 0)) continue;
+      out.push({ id: Date.now() + i, amount, category, date });
+    }
+    return out;
+  }
+
+  function showImportDialog() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Import data</strong>
+          <button id="imp-close" style="background:#334155;color:#f1f5f9;border:1px solid #334155;padding:6px 12px;border-radius:8px;cursor:pointer">Close</button>
+        </div>
+        <p style="color:#94a3b8;font-size:13px;margin:0">Paste CSV data below (from a previous Export). This will <strong>replace</strong> your current entries.</p>
+        <textarea id="imp-text" placeholder="Date,Category,Amount,Currency&#10;2026-06-04,Food,12.50,$" style="min-height:200px;background:#0f172a;color:#f1f5f9;border:1px solid #334155;border-radius:8px;padding:10px;font-family:monospace;font-size:12px"></textarea>
+        <button id="imp-go" style="background:#38bdf8;color:#0f172a;border:1px solid #38bdf8;padding:12px;border-radius:8px;font-weight:600;cursor:pointer">Replace my data with this</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#imp-close').onclick = () => overlay.remove();
+    overlay.querySelector('#imp-go').onclick = () => {
+      const text = overlay.querySelector('#imp-text').value;
+      const parsed = parseCsv(text);
+      if (!parsed.length) { showToast('No valid rows found', true); return; }
+      state.expenses = parsed;
+      save();
+      render();
+      overlay.remove();
+      showToast(`Imported ${parsed.length} entries`);
+    };
+  }
+
+  $('import-btn').addEventListener('click', showImportDialog);
+
+  $('export-btn').addEventListener('click', () => {
+    if (!state.expenses.length) {
+      alert('No expenses to export yet.');
+      return;
+    }
+    const csv = buildCsv();
+    const today = todayStr();
+    const filename = `expenses-${today}.csv`;
+    try {
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      showCsvFallback(csv);
+    }
+  });
+
+  // init
+  setDateToToday();
+  $('currency').value = state.currency;
+  $('currency-symbol').textContent = state.currency;
+  $('budget-symbol').textContent = state.currency;
+  render();
+</script>
+</body>
+</html>
