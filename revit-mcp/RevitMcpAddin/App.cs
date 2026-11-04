@@ -85,6 +85,15 @@ namespace RevitMcp
                 }
                 else if (ctx.Request.HttpMethod == "POST" && ctx.Request.Url.AbsolutePath == "/command")
                 {
+                    // Block web pages from driving Revit: browsers always send an Origin
+                    // header on cross-site POSTs, and require a CORS preflight (which we
+                    // never approve) before sending application/json. The MCP server sends neither.
+                    if (!string.IsNullOrEmpty(ctx.Request.Headers["Origin"]) ||
+                        !(ctx.Request.ContentType ?? "").StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new UnauthorizedAccessException("Requests from web browsers are not allowed.");
+                    }
+
                     string body;
                     using (var reader = new StreamReader(ctx.Request.InputStream, Encoding.UTF8))
                         body = await reader.ReadToEndAsync();
@@ -118,7 +127,7 @@ namespace RevitMcp
             }
             catch (Exception ex)
             {
-                status = 400;
+                status = ex is UnauthorizedAccessException ? 403 : 400;
                 responseJson = Error(ex.Message);
             }
 

@@ -11,23 +11,21 @@
     <PlatformTarget>x64</PlatformTarget>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RevitInstallDir Condition="'$(RevitInstallDir)' == ''">C:\Program Files\Autodesk\Revit 2025</RevitInstallDir>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RevitAddinsDir>$(AppData)\Autodesk\Revit\Addins\2025</RevitAddinsDir>
   </PropertyGroup>
 
+  <!--
+    Revit 2025 API reference assemblies from NuGet, so the add-in builds without
+    Revit installed. At runtime Revit supplies its own RevitAPI/RevitAPIUI.
+  -->
   <ItemGroup>
-    <Reference Include="RevitAPI">
-      <HintPath>$(RevitInstallDir)\RevitAPI.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="RevitAPIUI">
-      <HintPath>$(RevitInstallDir)\RevitAPIUI.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.4.60" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.4.60" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- After a build, copy the add-in + manifest into Revit's add-in folder -->
-  <Target Name="DeployToRevit" AfterTargets="Build">
+  <!-- On Windows, copy the add-in and its manifest into Revit's add-in folder after each build -->
+  <Target Name="DeployToRevit" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
     <MakeDir Directories="$(RevitAddinsDir)\RevitMcp" />
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(RevitAddinsDir)\RevitMcp" />
     <Copy SourceFiles="RevitMcp.addin" DestinationFolder="$(RevitAddinsDir)" />

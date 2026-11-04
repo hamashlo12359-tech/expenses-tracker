@@ -14,7 +14,7 @@ Everything runs on **your Windows PC**. Nothing is sent anywhere except between 
 ## Requirements (on the Windows PC with Revit)
 
 - Revit 2025
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), to build the add-in
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), to build the add-in (it downloads the Revit 2025 API reference packages from NuGet, so the build doesn't depend on where Revit is installed)
 - [Node.js 18+](https://nodejs.org)
 - Claude Desktop or Claude Code
 
@@ -31,8 +31,6 @@ dotnet build -c Release
 The build copies files to `%AppData%\Autodesk\Revit\Addins\2025\`:
 - `RevitMcp.addin`
 - `RevitMcp\RevitMcpAddin.dll`
-
-If Revit is not in `C:\Program Files\Autodesk\Revit 2025`, add `-p:RevitInstallDir="D:\Your\Revit 2025"` to the build command.
 
 Start Revit 2025. The first time, Revit asks whether to load the add-in. Click **Always Load**.
 
@@ -109,4 +107,8 @@ Each change runs in its own named transaction (`MCP: ...`), so you can undo it w
 
 - **"Cannot reach Revit"**: Revit isn't running, the add-in didn't load (check for a startup dialog), or port 8765 is already in use.
 - **"Revit is busy"**: Revit runs requests only when it's idle. Close any open dialog or finish the active command, such as wall placement, then try again.
-- **Build error about `RevitAPI`**: set `RevitInstallDir` as shown in step 1.
+- **Build can't download packages**: the build needs internet access to nuget.org the first time.
+
+## Security
+
+The add-in only listens on `localhost`, so other computers can't reach it. It also rejects requests from web browsers, so a website you visit can't send commands to Revit.
