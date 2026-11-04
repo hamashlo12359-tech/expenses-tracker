@@ -5,3 +5,8 @@ desktop.ini
 *~
 .vscode/
 .idea/
+
+# Revit MCP build outputs
+node_modules/
+revit-mcp/RevitMcpAddin/bin/
+revit-mcp/RevitMcpAddin/obj/

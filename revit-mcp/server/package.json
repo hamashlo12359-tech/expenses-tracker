@@ -1,0 +1,14 @@
+{
+  "name": "revit-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server that lets Claude talk to Autodesk Revit 2025 via the RevitMcp add-in",
+  "type": "module",
+  "bin": { "revit-mcp-server": "index.js" },
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^3.25.0"
+  }
+}

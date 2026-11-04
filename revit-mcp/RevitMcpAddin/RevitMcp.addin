@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>RevitMcp</Name>
+    <Assembly>RevitMcp\RevitMcpAddin.dll</Assembly>
+    <FullClassName>RevitMcp.App</FullClassName>
+    <ClientId>5b0f6c2e-8d7a-4f0e-9b61-3a2c7e1d4f90</ClientId>
+    <VendorId>RMCP</VendorId>
+    <VendorDescription>Revit MCP bridge for Claude</VendorDescription>
+  </AddIn>
+</RevitAddIns>
