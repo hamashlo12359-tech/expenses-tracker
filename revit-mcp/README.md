@@ -11,6 +11,20 @@ Claude ──MCP/stdio──▶ server/index.js ──HTTP localhost:8765──�
 
 Everything runs on **your Windows PC**. Nothing is sent anywhere except between Claude and Revit.
 
+## Quick install (recommended)
+
+1. Unzip or clone this folder anywhere on the Windows PC that has Revit 2025, for example `C:\RevitMcp`.
+2. Double-click **`install.cmd`**. It:
+   - installs the .NET 8 SDK and Node.js with winget if they're missing
+   - builds the Revit add-in and installs it into `%AppData%\Autodesk\Revit\Addins\2025`
+   - installs the MCP server
+   - registers the server with Claude Desktop (backing up your existing config) and with Claude Code, if installed
+3. Fully quit Claude Desktop and reopen it, then start Revit and click **Always Load**.
+
+Don't move the folder after installing: Claude starts the server from its current location. If you do move it, run `install.cmd` again.
+
+The manual steps below do the same thing.
+
 ## Requirements (on the Windows PC with Revit)
 
 - Revit 2025
